@@ -20,7 +20,7 @@ namespace RedMango_API.Services
 
         }
 
-        public async Task<string> GetBlob(string blobName, string containerName)
+        public  string GetBlob(string blobName, string containerName)
         {
             BlobContainerClient blobContainerClient = _blobClient.GetBlobContainerClient(containerName);
             BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
@@ -38,7 +38,7 @@ namespace RedMango_API.Services
             var result = await blobClient.UploadAsync(file.OpenReadStream(),httpHeaders);
             if (result != null)
             {
-                return await GetBlob(blobName, containerName);
+                return GetBlob(blobName, containerName);
             }
             return "";
         }

@@ -16,7 +16,7 @@ namespace RedMango_API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-        private ApiResponse _response;
+        private readonly ApiResponse _response;
         public OrderController(ApplicationDbContext db)
         {
             _db = db;
@@ -24,8 +24,8 @@ namespace RedMango_API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse>> GetOrders(string? userId,
-            string searchString, string status, int pageNumber =1, int pageSize=5)
+        public ActionResult<ApiResponse> GetOrders(string userId="",
+            string searchString="", string status = "", int pageNumber =1, int pageSize=0)
         {
             try
             {
@@ -34,8 +34,6 @@ namespace RedMango_API.Controllers
                     .ThenInclude(u => u.MenuItem)
                     .OrderByDescending(u => u.OrderHeaderId);
 
-
-
                 if (!string.IsNullOrEmpty(userId)){
                     orderHeaders = orderHeaders.Where(u => u.ApplicationUserId == userId);
                 }
@@ -43,25 +41,32 @@ namespace RedMango_API.Controllers
                 if (!string.IsNullOrEmpty(searchString))
                 {
                     orderHeaders = orderHeaders
-                        .Where(u => u.PickupPhoneNumber.ToLower().Contains(searchString.ToLower()) ||
-                    u.PickupEmail.ToLower().Contains(searchString.ToLower()) 
-                    || u.PickupName.ToLower().Contains(searchString.ToLower()));
+                        .Where(u => u.PickupPhoneNumber.Contains(searchString, StringComparison.CurrentCultureIgnoreCase) ||
+                    u.PickupEmail.Contains(searchString, StringComparison.CurrentCultureIgnoreCase)
+                    || u.PickupName.Contains(searchString, StringComparison.CurrentCultureIgnoreCase));
                 }
                 if (!string.IsNullOrEmpty(status))
                 {
-                    orderHeaders = orderHeaders.Where(u => u.Status.ToLower() == status.ToLower());
+                    orderHeaders = orderHeaders.Where(u => u.Status.Equals(status, StringComparison.CurrentCultureIgnoreCase));
                 }
 
-                Pagination pagination = new()
+                if (pageSize > 0)
                 {
-                    CurrentPage = pageNumber,
-                    PageSize = pageSize,
-                    TotalRecords = orderHeaders.Count(),
-                };
+                    Pagination pagination = new()
+                    {
+                        CurrentPage = pageNumber,
+                        PageSize = pageSize,
+                        TotalRecords = orderHeaders.Count(),
+                    };
 
-                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
+                    Response.Headers.Append("X-Pagination", JsonSerializer.Serialize(pagination));
 
-                _response.Result = orderHeaders.Skip((pageNumber-1)*pageSize).Take(pageSize);
+                    _response.Result = orderHeaders.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+                }
+                else
+                {
+                    _response.Result = orderHeaders;
+                }
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
             }
@@ -69,7 +74,7 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
             return _response;
         }
@@ -77,7 +82,7 @@ namespace RedMango_API.Controllers
         
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ApiResponse>> GetOrders(int id)
+        public ActionResult<ApiResponse> GetOrders(int id)
         {
             try
             {
@@ -87,10 +92,10 @@ namespace RedMango_API.Controllers
                     return BadRequest(_response);
                 }
 
-
                 var orderHeaders = _db.OrderHeaders.Include(u => u.OrderDetails)
                     .ThenInclude(u => u.MenuItem)
                     .Where(u => u.OrderHeaderId==id);
+                
                 if (orderHeaders == null)
                 {
                     _response.StatusCode = HttpStatusCode.NotFound;
@@ -104,14 +109,14 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
             return _response;
         }
 
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> CreateOrder([FromBody] OrderHeaderCreateDTO orderHeaderDTO)
+        public ActionResult<ApiResponse> CreateOrder([FromBody] OrderHeaderCreateDTO orderHeaderDTO)
         {
             try
             {
@@ -155,13 +160,13 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
             return _response;
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ApiResponse>> UpdateOrderHeader(int id, [FromBody] OrderHeaderUpdateDTO orderHeaderUpdateDTO)
+        public ActionResult<ApiResponse> UpdateOrderHeader(int id, [FromBody] OrderHeaderUpdateDTO orderHeaderUpdateDTO)
         {
             try
             {
@@ -195,10 +200,7 @@ namespace RedMango_API.Controllers
                 {
                     orderFromDb.Status = orderHeaderUpdateDTO.Status;
                 }
-                if (!string.IsNullOrEmpty(orderHeaderUpdateDTO.StripePaymentIntentID))
-                {
-                    orderFromDb.StripePaymentIntentID = orderHeaderUpdateDTO.StripePaymentIntentID;
-                }
+               
                 _db.SaveChanges();
                 _response.StatusCode = HttpStatusCode.NoContent;
                 _response.IsSuccess = true;
@@ -211,7 +213,7 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
             return _response;
         }

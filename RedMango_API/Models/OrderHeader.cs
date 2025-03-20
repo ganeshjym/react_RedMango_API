@@ -21,7 +21,6 @@ namespace RedMango_API.Models
 
 
         public DateTime OrderDate { get; set; }
-        public string StripePaymentIntentID { get; set; }
         public string Status { get; set; }
         public int TotalItems { get; set; }
 

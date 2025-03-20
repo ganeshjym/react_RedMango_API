@@ -26,7 +26,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMenuItems()
+        public IActionResult GetMenuItems()
         {
             _response.Result = _db.MenuItems;
             _response.StatusCode=HttpStatusCode.OK;
@@ -34,7 +34,7 @@ namespace RedMango_API.Controllers
         }
 
         [HttpGet("{id:int}",Name = "GetMenuItem")]
-        public async Task<IActionResult> GetMenuItem(int id)
+        public IActionResult GetMenuItem(int id)
         {
             if (id == 0)
             {
@@ -93,7 +93,7 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
 
             return _response;
@@ -149,7 +149,7 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
 
             return _response;
@@ -188,7 +188,7 @@ namespace RedMango_API.Controllers
             {
                 _response.IsSuccess = false;
                 _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                     = [ex.ToString()];
             }
 
             return _response;

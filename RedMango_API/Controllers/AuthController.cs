@@ -19,10 +19,10 @@ namespace RedMango_API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-        private ApiResponse _response;
+        private readonly ApiResponse _response;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private string secretKey;
+        private readonly string secretKey;
         public AuthController(ApplicationDbContext db, IConfiguration configuration,
             UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -37,7 +37,7 @@ namespace RedMango_API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
             ApplicationUser userFromDb = _db.ApplicationUsers
-                    .FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
+                    .FirstOrDefault(u => u.UserName.Equals(model.UserName, StringComparison.CurrentCultureIgnoreCase));
 
             bool isValid = await _userManager.CheckPasswordAsync(userFromDb, model.Password);
 
@@ -57,13 +57,13 @@ namespace RedMango_API.Controllers
 
             SecurityTokenDescriptor tokenDescriptor = new()
             {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim("fullName", userFromDb.Name),
-                    new Claim("id", userFromDb.Id.ToString()),
-                    new Claim(ClaimTypes.Email, userFromDb.UserName.ToString()),
-                    new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
-                }),
+                Subject = new ClaimsIdentity(
+                [
+                    new("fullName", userFromDb.Name),
+                    new("id", userFromDb.Id.ToString()),
+                    new(ClaimTypes.Email, userFromDb.UserName.ToString()),
+                    new(ClaimTypes.Role, roles.FirstOrDefault()),
+                ]),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -95,7 +95,7 @@ namespace RedMango_API.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO model)
         {
             ApplicationUser userFromDb = _db.ApplicationUsers
-                .FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
+                .FirstOrDefault(u => u.UserName.Equals(model.UserName, StringComparison.CurrentCultureIgnoreCase));
 
             if (userFromDb != null)
             {
@@ -124,7 +124,7 @@ namespace RedMango_API.Controllers
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
                     }
-                    if (model.Role.ToLower() == SD.Role_Admin)
+                    if (model.Role.Equals(SD.Role_Admin, StringComparison.CurrentCultureIgnoreCase))
                     {
                         await _userManager.AddToRoleAsync(newUser, SD.Role_Admin);
                     }

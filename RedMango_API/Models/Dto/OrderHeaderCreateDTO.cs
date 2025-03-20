@@ -16,7 +16,6 @@ namespace RedMango_API.Models.Dto
         public double OrderTotal { get; set; }
 
 
-        public string StripePaymentIntentID { get; set; }
         public string Status { get; set; }
         public int TotalItems { get; set; }
 
