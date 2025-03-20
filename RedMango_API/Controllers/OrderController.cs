@@ -128,7 +128,6 @@ namespace RedMango_API.Controllers
                     PickupPhoneNumber = orderHeaderDTO.PickupPhoneNumber,
                     OrderTotal = orderHeaderDTO.OrderTotal,
                     OrderDate = DateTime.Now,
-                    StripePaymentIntentID = orderHeaderDTO.StripePaymentIntentID,
                     TotalItems = orderHeaderDTO.TotalItems,
                     Status= String.IsNullOrEmpty(orderHeaderDTO.Status)? SD.status_pending : orderHeaderDTO.Status,
                 };
