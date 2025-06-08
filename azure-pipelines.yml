@@ -38,5 +38,5 @@ steps:
 - task: IISWebAppDeploymentOnMachineGroup@0
   inputs:
     WebSiteName: 'RedMango_API'
+    VirtualApplication: 'DESKTOP-DBCOBMD'
     Package: '$(System.DefaultWorkingDirectory)\**\*.zip'
-
