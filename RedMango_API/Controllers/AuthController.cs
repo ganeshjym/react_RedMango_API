@@ -14,7 +14,7 @@ using System.Text;
 
 namespace RedMango_API.Controllers
 {
-    [Route("api/auth2")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
