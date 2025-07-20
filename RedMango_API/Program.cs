@@ -60,7 +60,7 @@ builder.Services.AddAuthentication(u =>
     };
 });
 
-builder.Services.AddCors();
+//builder.Services.AddCors();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
