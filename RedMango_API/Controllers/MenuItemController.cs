@@ -155,7 +155,6 @@ namespace RedMango_API.Controllers
             return _response;
         }
 
-
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ApiResponse>> DeleteMenuItem(int id)
         {
