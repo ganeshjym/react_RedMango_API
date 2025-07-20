@@ -11,6 +11,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .WithOrigins("http://localhost:3000/")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -85,6 +94,7 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+app.UseCors("AllowFrontend");
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 
