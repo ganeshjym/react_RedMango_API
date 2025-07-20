@@ -1,4 +1,4 @@
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +11,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend",
-//        policy => policy
-//            .WithOrigins("http://localhost:3000/")
-//            .AllowAnyHeader()
-//            .AllowAnyMethod());
-//});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+            "https://your-frontend-domain.com",
+            "http://localhost:3000")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
 
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -94,7 +98,7 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-//app.UseCors("AllowFrontend");
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 
@@ -117,8 +121,9 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("*"));
+//app.UseCors(o => o.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("*"));
 //app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader().SetIsOriginAllowed(origin => true).AllowCredentials());
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
